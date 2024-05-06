@@ -1,7 +1,4 @@
-#include "../includes/Window.h"
-#include <iostream>
-#include <SFML/Graphics.hpp>
-#include <SFML/Graphics/Color.hpp>
+#include "../../includes/03_Snakegame/Window.h"
 
 Window::Window()
 {
@@ -91,4 +88,9 @@ sf::Vector2u Window::GetWindowSize()
 void Window::Draw(sf::Drawable& l_drawable)
 {
     m_window.draw(l_drawable);
+
+}
+sf::RenderWindow* Window::GetRenderWindow()
+{
+    return &m_window;
 }

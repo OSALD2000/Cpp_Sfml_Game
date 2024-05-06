@@ -1,4 +1,4 @@
-#include "includes/Game.h"
+#include "includes/03_Snakegame/Game.h"
 
 int main(int, char**) {
     // Program entry point.
@@ -8,6 +8,7 @@ int main(int, char**) {
         game.HandleInput();
         game.Update();
         game.Render();
+        game.RestartClock();
     }
 
     return 0;
