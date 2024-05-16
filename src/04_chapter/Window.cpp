@@ -1,4 +1,4 @@
-#include "../../includes/03_Snakegame/Window.h"
+#include "../../includes/04_chapter/Window.h"
 
 Window::Window()
 {
@@ -41,21 +41,16 @@ void Window::Destroy()
 void Window::Update()
 {
     sf::Event event;
-
     while (m_window.pollEvent(event)) {
-        switch (event.type) {
-        case sf::Event::Closed:
-            m_window.close();
-            break;
-
-        case sf::Event::KeyPressed:
-            if (event.key.code == sf::Keyboard::W) {
-                // Do something when W key gets pressed once.
-            }
-            break;
+        if (event.type == sf::Event::Closed) {
+            m_isDone = true;
+        }
+        else if (event.type == sf::Event::KeyPressed &&
+            event.key.code == sf::Keyboard::F5)
+        {
+            ToggleFullscreen();
         }
     }
-
 };
 
 void Window::ToggleFullscreen()
