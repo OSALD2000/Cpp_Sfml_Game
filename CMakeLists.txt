@@ -12,7 +12,13 @@ set(RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 # Copy resources to build directory
 file(COPY ${RESOURCES_DIR} DESTINATION ${CMAKE_BINARY_DIR})
 
-file(GLOB SOURCES "src/03_Snakegame/*.cpp")
+set(CONFIG_FILES_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(CONFIG_FILE_NAME keys.cfg)
+
+configure_file(${CONFIG_FILES_DIR}/${CONFIG_FILE_NAME} ${CONFIG_FILE_NAME} COPYONLY)
+
+
+file(GLOB SOURCES "src/04_chapter/*.cpp")
 
 add_executable(first_project 
 main.cpp

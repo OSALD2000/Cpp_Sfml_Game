@@ -45,6 +45,7 @@ void Game::Update()
         m_world.Update(m_snake);
         m_window.Update();
         m_elapsed -= timestep;
+        TakeScreenShot();
         if (m_snake.HasLost()) {
             m_snake.Reset();
         }
@@ -57,13 +58,13 @@ Window* Game::GetWindow()
     return &m_window;
 };
 
+
 void Game::Render()
 {
     m_window.BeginDraw();
     // Render here.
     m_world.Render(*m_window.GetRenderWindow());
     m_snake.Render(*m_window.GetRenderWindow());
-    m_textbox.Render(*m_window.GetRenderWindow());
 
     m_window.EndDraw();
 };
@@ -80,3 +81,13 @@ void Game::RestartClock()
 
 };
 
+void Game::TakeScreenShot()
+{
+   sf::Vector2u windowSize = m_window.GetRenderWindow()->getSize();
+   m_screenshot.s_screenshot_textur.create(windowSize.x, windowSize.y);
+   m_screenshot.s_screenshot_textur.update(*m_window.GetRenderWindow());
+   m_screenshot.s_screenshot = m_screenshot.s_screenshot_textur.copyToImage();
+   m_screenshot.s_screenshot.saveToFile("screenshot.png");
+
+   return;
+}
