@@ -36,7 +36,7 @@ bool EventManager::RemoveBinding(std::string l_name)
 };
 
 
-void EventManager::HandleEvent(sf::Event& l_event){
+void EventManager:: HandleEvent(sf::Event& l_event){
   // Handling SFML events.
   for (auto &b_itr : m_bindings){
     Binding* bind = b_itr.second;

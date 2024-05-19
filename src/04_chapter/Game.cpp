@@ -34,7 +34,6 @@ void Game::Update()
     if (m_elapsed.asSeconds() >= m_frametime)
     {
         m_window.Update(); // Update window events.
-        MoveMushroom();
         m_elapsed -= sf::seconds(m_frametime);
     }
 };
