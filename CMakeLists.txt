@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(SFML COMPONENTS graphics window system REQUIRED)
 
+# Definiere den Pfad zu den Headerdateien
+include_directories(${PROJECT_SOURCE_DIR}/includes/05_state)
+
 # Set the directory containing resource files
 set(RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
@@ -18,7 +21,7 @@ set(CONFIG_FILE_NAME keys.cfg)
 configure_file(${CONFIG_FILES_DIR}/${CONFIG_FILE_NAME} ${CONFIG_FILE_NAME} COPYONLY)
 
 
-file(GLOB SOURCES "src/04_chapter/*.cpp")
+file(GLOB SOURCES "src/05_state/*.cpp")
 
 add_executable(first_project 
 main.cpp
