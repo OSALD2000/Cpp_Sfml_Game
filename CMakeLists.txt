@@ -6,9 +6,6 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(SFML COMPONENTS graphics window system REQUIRED)
 
-# Definiere den Pfad zu den Headerdateien
-include_directories(${PROJECT_SOURCE_DIR}/includes/05_state)
-
 # Set the directory containing resource files
 set(RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
