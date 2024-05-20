@@ -1,4 +1,4 @@
-#include "../../includes/03_Snakegame/World.h"
+#include "../includes/World.h"
 
 World::World(sf::Vector2u l_windSize)
 {

@@ -1,4 +1,4 @@
-#include "../../includes/04_chapter/Window.h"
+#include "../includes/Window.h"
 
 Window::Window()
 {
@@ -22,10 +22,6 @@ void Window::Setup(const std::string& l_title, const sf::Vector2u& l_size)
     m_isFullscreen = false;
     m_isDone = false;
     Create();
-
-    m_isFocused = true; // Default value for focused flag.
-    m_eventManager.AddCallback("Fullscreen_toggle", &Window::ToggleFullscreen,this);
-    m_eventManager.AddCallback("Window_close", &Window::Close,this);
 };
 
 void Window::Create()
@@ -42,21 +38,27 @@ void Window::Destroy()
     m_window.close();
 };
 
-void Window::Update(){
-   sf::Event event;
-   while(m_window.pollEvent(event)){
-      if (event.type == sf::Event::LostFocus){
-         m_isFocused = false;
-         m_eventManager.SetFocus(false);
-      }
-      else if (event.type == sf::Event::GainedFocus){
-         m_isFocused = true;
-         m_eventManager.SetFocus(true);
-      }
-      m_eventManager.HandleEvent(event);
-   }
-   m_eventManager.Update();
-}
+void Window::Update()
+{
+    sf::Event event;
+
+    while (m_window.pollEvent(event)) {
+        switch (event.type) {
+        case sf::Event::Closed:
+            Destroy();
+            m_isDone = true;
+            
+            break;
+
+        case sf::Event::KeyPressed:
+            if (event.key.code == sf::Keyboard::W) {
+                // Do something when W key gets pressed once.
+            }
+            break;
+        }
+    }
+
+};
 
 void Window::ToggleFullscreen()
 {
@@ -96,27 +98,6 @@ void Window::Draw(sf::Drawable& l_drawable)
 
 }
 sf::RenderWindow* Window::GetRenderWindow()
-{ 
+{
     return &m_window;
 }
-
-void Window::Close(EventDetails* l_details)
-{ 
-    m_isDone = true; 
-}
-
-
-bool Window::IsFocused()
-{
-  return m_isFocused;
-};
-
-EventManager* Window::GetEventManager()
-{
-    return &m_eventManager;
-};
-
-void Window::ToggleFullscreen(EventDetails* l_details)
-{
-
-};

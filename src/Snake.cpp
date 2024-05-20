@@ -1,4 +1,4 @@
-#include "../../includes/03_Snakegame/Snake.h"
+#include "../includes/Snake.h"
 
 
 
@@ -22,7 +22,7 @@ void Snake::Reset()
     m_snakeBody.push_back(SnakeSegment(5,5));
 
     SetDirection(Direction::None); // Start off still.
-    m_speed = 17;
+    m_speed = 15;
     m_lives = 3;
     m_score = 0;
     m_lost = false;

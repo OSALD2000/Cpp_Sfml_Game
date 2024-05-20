@@ -1,4 +1,4 @@
-#include "../../includes/03_Snakegame/TextBox.h"
+#include "../includes/TextBox.h"
 #include <SFML/Graphics/Color.hpp>
 
 Textbox::Textbox(){

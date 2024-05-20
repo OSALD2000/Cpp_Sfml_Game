@@ -1,4 +1,4 @@
-#include "../../includes/03_Snakegame/Game.h"
+#include "../includes/Game.h"
 
 Game::Game() :m_window("Chapter 2", sf::Vector2u(800, 600)),
 m_world(sf::Vector2u(800, 600)), m_snake(m_world.GetBlockSize())
