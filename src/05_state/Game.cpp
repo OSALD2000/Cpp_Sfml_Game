@@ -10,12 +10,19 @@ void Game::MoveSprite(EventDetails* l_details){
 
 Game::Game(): m_window("Chapter 5", sf::Vector2u(800, 600)), m_stateManager(&m_context)
 {
+    m_clock.restart();
+	srand(time(nullptr));
+    
     // Setting up class members.
     m_mushroomTexture.loadFromFile("./resources/Mushroom.png");
     m_mushroom.setTexture(m_mushroomTexture);
     m_increment = sf::Vector2i(400, 400); // 400px a second.
     m_frametime = 1.0f / 60.0f;
 
+    m_context.m_wind = &m_window;
+	m_context.m_eventManager = m_window.GetEventManager();
+
+    m_stateManager.SwitchTo(StateType(1));
 
     std::string eventName = "Move";
     m_window.GetEventManager()->AddCallback(StateType(3), eventName, &Game::MoveSprite, this);
