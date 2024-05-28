@@ -40,24 +40,6 @@ void Window::Destroy()
 
 void Window::Update()
 {
-    sf::Event event;
-
-    while (m_window.pollEvent(event)) {
-        switch (event.type) {
-        case sf::Event::Closed:
-            Destroy();
-            m_isDone = true;
-            
-            break;
-
-        case sf::Event::KeyPressed:
-            if (event.key.code == sf::Keyboard::W) {
-                // Do something when W key gets pressed once.
-            }
-            break;
-        }
-    }
-
 };
 
 void Window::ToggleFullscreen()

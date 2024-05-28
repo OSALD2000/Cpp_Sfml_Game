@@ -2,7 +2,7 @@
 
 World::World(sf::Vector2u l_windSize)
 {
-  m_blockSize = 16;
+  m_blockSize = 20;
 
   m_windowSize = l_windSize;
   RespawnApple();
@@ -10,7 +10,7 @@ World::World(sf::Vector2u l_windSize)
   m_appleShape.setRadius(m_blockSize / 2);
 
   for(int i = 0; i < 4; i++){
-    m_bounds[i].setFillColor(sf::Color(150,0,0));
+    m_bounds[i].setFillColor(sf::Color(0,0,150));
     if(!((i + 1) % 2)){
       m_bounds[i].setSize(sf::Vector2f(m_windowSize.x,
         m_blockSize));
@@ -46,7 +46,7 @@ void World::Update(Snake& l_player)
         l_player.Extend();
         l_player.IncreaseScore();
         RespawnApple();
-    }
+    }         
 
     int gridSize_x = m_windowSize.x / m_blockSize;
     int gridSize_y = m_windowSize.y / m_blockSize;

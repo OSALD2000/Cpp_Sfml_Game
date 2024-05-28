@@ -1,6 +1,6 @@
 #include "../includes/Game.h"
 
-Game::Game() :m_window("Chapter 2", sf::Vector2u(800, 600)),
+Game::Game() :m_window("SNAKE_GAME_WINDOWS", sf::Vector2u(800, 600)),
 m_world(sf::Vector2u(800, 600)), m_snake(m_world.GetBlockSize())
 {
     m_textbox.Setup(5,14,350,sf::Vector2f(225,0));
@@ -14,25 +14,59 @@ Game::~Game()
 void Game::HandleInput()
 {  
     
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)
-        && m_snake.GetPhysicalDirection() != Direction::Down)
-    {
-        m_snake.SetDirection(Direction::Up);
-    }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)
-        && m_snake.GetPhysicalDirection() != Direction::Up)
-    {
-        m_snake.SetDirection(Direction::Down);
-    }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)
-        && m_snake.GetPhysicalDirection() != Direction::Right)
-    {
-        m_snake.SetDirection(Direction::Left);
-    }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)
-        && m_snake.GetPhysicalDirection() != Direction::Left)
-    {
-        m_snake.SetDirection(Direction::Right);
+    // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)
+    //     && m_snake.GetPhysicalDirection() != Direction::Down)
+    // {
+    //     m_snake.SetDirection(Direction::Up);
+    // }
+    // else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)
+    //     && m_snake.GetPhysicalDirection() != Direction::Up)
+    // {
+    //     m_snake.SetDirection(Direction::Down);
+    // }
+    // else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)
+    //     && m_snake.GetPhysicalDirection() != Direction::Right)
+    // {
+    //     m_snake.SetDirection(Direction::Left);
+    // }
+    // else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)
+    //     && m_snake.GetPhysicalDirection() != Direction::Left)
+    // {
+    //     m_snake.SetDirection(Direction::Right);
+    // }
+
+    sf::Event event;
+
+    while (m_window.m_window.pollEvent(event)) {
+        switch (event.type) {
+        case sf::Event::Closed:
+            m_window.Destroy();
+            m_window.m_isDone = true;    
+            break;
+
+        case sf::Event::KeyPressed:
+            if (event.key.code == sf::Keyboard::Up
+                && m_snake.GetPhysicalDirection() != Direction::Down)
+            {
+                m_snake.SetDirection(Direction::Up);
+            }
+            else if (event.key.code == sf::Keyboard::Down
+                && m_snake.GetPhysicalDirection() != Direction::Up)
+            {
+                m_snake.SetDirection(Direction::Down);
+            }
+            else if (event.key.code == sf::Keyboard::Left
+                && m_snake.GetPhysicalDirection() != Direction::Right)
+            {
+                m_snake.SetDirection(Direction::Left);
+            }
+            else if (event.key.code == sf::Keyboard::Right
+                && m_snake.GetPhysicalDirection() != Direction::Left)
+            {
+                m_snake.SetDirection(Direction::Right);
+            }
+            break;
+        }
     }
 };
 
@@ -43,9 +77,7 @@ void Game::Update()
     if (m_elapsed >= timestep) {
         m_snake.Tick();
         m_world.Update(m_snake);
-        m_window.Update();
         m_elapsed -= timestep;
-        TakeScreenShot();
         if (m_snake.HasLost()) {
             m_snake.Reset();
         }
@@ -80,14 +112,3 @@ void Game::RestartClock()
     m_elapsed += m_clock.restart().asSeconds();
 
 };
-
-void Game::TakeScreenShot()
-{
-   sf::Vector2u windowSize = m_window.GetRenderWindow()->getSize();
-   m_screenshot.s_screenshot_textur.create(windowSize.x, windowSize.y);
-   m_screenshot.s_screenshot_textur.update(*m_window.GetRenderWindow());
-   m_screenshot.s_screenshot = m_screenshot.s_screenshot_textur.copyToImage();
-   m_screenshot.s_screenshot.saveToFile("screenshot.png");
-
-   return;
-}

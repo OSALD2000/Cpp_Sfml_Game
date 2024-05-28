@@ -5,16 +5,6 @@
 #include "TextBox.h"
 
 
-struct Screenshot
-{
-	sf::Texture s_screenshot_textur;
-	sf::Image s_screenshot;
-	const sf::Uint8* pixels;
-	int width;
-	int height;
-
-};
-
 class Game{
 public:
 	Game();
@@ -33,8 +23,6 @@ public:
 	
 private:
 
-	void TakeScreenShot();
-	
 	Window m_window;
 	sf::Clock m_clock;
 	float m_elapsed;
@@ -42,5 +30,4 @@ private:
 
 	World m_world;
 	Snake m_snake;
-	Screenshot m_screenshot;
 };
