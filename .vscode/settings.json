@@ -50,7 +50,20 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "fstream": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "format": "cpp",
+        "any": "cpp",
+        "charconv": "cpp",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "cstring": "cpp",
+        "forward_list": "cpp",
+        "ratio": "cpp",
+        "iomanip": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "valarray": "cpp",
+        "variant": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

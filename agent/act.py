@@ -9,7 +9,7 @@ def loud_features():
         data = json.load(f)
     
     pixle_map = np.array(data['pixle_map'])
-    apple     = np.array(data['action'])
+    apple     = np.array(data['apple'])
     haed      = np.array(data['reward'])
     
     return pixle_map, apple, haed

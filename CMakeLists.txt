@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(SFML COMPONENTS graphics window system REQUIRED)
 
+set(JSON_INCLUDE_DIR /home/osa/c_libs/json/include)
+
 # Set the directory containing resource files
 set(RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 set(AGENT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/agent)
@@ -25,4 +27,5 @@ ${SOURCES}
 )
 
 target_link_libraries(snake_game PRIVATE sfml-graphics sfml-window sfml-system)
+target_include_directories(snake_game PRIVATE ${JSON_INCLUDE_DIR})
 
