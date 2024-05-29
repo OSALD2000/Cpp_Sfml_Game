@@ -5,14 +5,20 @@ import json
 def loud_features():
     print("Loud Features")
     
-    with open('before_act.json', 'r') as f:
-        data = json.load(f)
+    with open('env_data/old_env.json', 'r') as f1:
+        old_env = json.load(f1)
     
-    pixle_map = np.array(data['pixle_map'])
-    apple     = np.array(data['apple'])
-    haed      = np.array(data['reward'])
+    with open('env_data/old_head_pos.json', 'r') as f2:
+        old_head_pos= json.load(f2)
     
-    return pixle_map, apple, haed
+    with open('env_data/old_apple_pos.json', 'r') as f3:
+        old_apple_pos = json.load(f3)
+    
+    old_map   = np.array(old_env)
+    apple     = np.array(old_head_pos)
+    haed      = np.array(old_apple_pos)
+    
+    return old_map, apple, haed
 
 
 def act():
@@ -24,11 +30,15 @@ def act():
         apple_flat = apple.flatten()
         combined_flat = np.concatenate([map_flat, snake_head_flat, apple_flat])
         env = combined_flat.reshape(1, -1)
-        action = {
-            'action' : agent.act(env)
-            }
-        with open('action.json', 'w') as f:
-            json.dump(action, f, indent=4)
+        
+        print(env.shape)
+        
+        action_index = agent.act(env)
+        
+        action = {'action': str(action_index)}
+        
+        with open('env_data/action.json', 'w') as f:
+            json.dump(action, f)
             
     except Exception as e:
         print("act, Something went wrong ", e)

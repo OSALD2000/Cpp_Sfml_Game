@@ -9,8 +9,13 @@
 using json = nlohmann::json;
 struct Environment
 {
+    sf::Texture image_texture;
     std::vector<std::vector<int>>* old_pixel_map;
     std::vector<std::vector<int>>* new_pixel_map;
+    int old_head_pos[2];
+    int new_head_pos[2];
+    int old_apple_pos[2];
+    int new_apple_pos[2];
     int action;
     int reward;
     int old_state;
@@ -26,13 +31,7 @@ enum Action
     RIGHT = 3
 };
 
-enum State
-{
-    UP = 0,
-    DOWN = 1,
-    LEFT = 2,
-    RIGHT = 3
-};
+//enum State{};
 
 enum WORLD_CREATIORS
 {
@@ -56,18 +55,18 @@ public:
     void update_exploration_rate();
     
 private:
-    void write_in_file(std::string file_name);
-    std::vector<std::vector<int>>* get_features(sf::Image& image);
-
+    void write_in_file(std::string file_name, json& data);
+    std::vector<std::vector<int>>* get_features(sf::Image& image, bool before_act);
     Environment _env;
     std::string _python_interpreter;
-    
     std::string _act_json_file_name;
-    std::string _old_env_json_file_name;
     std::string _action_json_file_name;
+    std::string _old_env_json_file_name;
     std::string _new_env_json_file_name;
-
+    std::string _old_head_pos_json_file_name;
+    std::string _new_head_pos_json_file_name;
+    std::string _old_apple_pos_json_file_name;
+    std::string _new_apple_pos_json_file_name;
     std::string _act_python_file_name;
     std::string _update_q_value_python_file_name;
-
 };

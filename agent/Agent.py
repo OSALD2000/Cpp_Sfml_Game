@@ -4,11 +4,9 @@ from collections import deque
 import os
 
 class Agent():
-    def __init__(self, state_size, action_size, feature_size, new_model = False):
-        self.state_size = state_size
+    def __init__(self, action_size, feature_size, new_model = False):
         self.feature_size = feature_size
         self.action_size = action_size
-        self.memory = deque(maxlen=2000)
         self.learning_rate = 0.1
         self.discount_rate = 0.99
         self.exploration_rate = 1
@@ -19,7 +17,7 @@ class Agent():
         self.model = self._build_model(new_model)
 
     def _build_model(self, new_model):
-        if not os.path.exists('q_deep_model') and not new_model:
+        if not os.path.exists('agent/model/q_deep_model') and not new_model:
             model = tf.keras.Sequential([
                 tf.keras.layers.Dense(self.feature_size,activation='relu', input_shape=(self.feature_size,)),
                 tf.keras.layers.Dense(24, activation='relu'),
@@ -27,9 +25,9 @@ class Agent():
             ])
             model.compile(optimizer=tf.keras.optimizers.Adam(), loss='mse')
             
-            model.save('q_deep_model')
+            model.save('agent/model/q_deep_model')
         else:
-            model = tf.keras.models.load_model('q_deep_model')
+            model = tf.keras.models.load_model('agent/model/q_deep_model')
             
         return model
     

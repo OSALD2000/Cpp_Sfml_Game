@@ -2,7 +2,7 @@
 
 Window::Window()
 {
-    Setup("Window", sf::Vector2u(640, 480));
+    Setup("Window", sf::Vector2u(800, 800));
 };
 
 Window::Window(const std::string& l_title, const sf::Vector2u& l_size)
@@ -26,10 +26,12 @@ void Window::Setup(const std::string& l_title, const sf::Vector2u& l_size)
 
 void Window::Create()
 {
-    auto style = (m_isFullscreen ? sf::Style::Fullscreen
-        : sf::Style::Default);
+    auto style = sf::Style::Default;
+
     m_window.create({ m_windowSize.x, m_windowSize.y, 32 },
         m_windowTitle, style);
+    
+    m_window.setFramerateLimit(60);
 };
 
 
