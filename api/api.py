@@ -31,16 +31,14 @@ async def env_after_act(new_env: NewEnvironmentJSON):
     new_haed = np.array(new_env.head_pos).flatten()
     new_apple = np.array(new_env.apple_pos).flatten()
     new_combined_flat = np.concatenate([new_map_flat, new_haed, new_apple])
-    new_env = new_combined_flat.reshape(1, -1)
-    envirmunet.new_env = new_env
+    new_env_array = new_combined_flat.reshape(1, -1)
+    envirmunet.new_env = new_env_array
+    envirmunet.reward = new_env.reward
     return
 
-@app.post("/reward")
-async def update_reward(reward: int):
-    envirmunet.reward = reward
-    return
 
-@app.post("/update_q_values")
+@app.get("/update_q_values")
 async def update_q_values():
     agent.update_q_values(old_env=envirmunet.old_env, action=envirmunet.action, reward= envirmunet.reward, new_env=envirmunet.new_env)
     return
+ 

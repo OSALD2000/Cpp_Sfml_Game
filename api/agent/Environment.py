@@ -20,3 +20,4 @@ class NewEnvironmentJSON(BaseModel):
         head_pos: List[int]  = []
         apple_pos: List[int]  = []
         new_map: List[List[int]] = [[]]
+        reward: int = 0

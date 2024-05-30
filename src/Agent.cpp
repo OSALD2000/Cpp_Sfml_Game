@@ -52,9 +52,11 @@ size_t write_action_callback(void *contents, size_t size, size_t nmemb, std::str
     size_t total_size = size * nmemb;
     buffer->append(static_cast<char*>(contents), total_size);
     return total_size;
- }
+}
  
-
+size_t discardCallback(void *ptr, size_t size, size_t nmemb, void *stream) {
+    return size * nmemb;
+}
 
 void Agent::craete_enviroment(Window* window, bool before_act)
 {
@@ -68,7 +70,8 @@ void Agent::craete_enviroment(Window* window, bool before_act)
             std::cerr << "Curl failed to initialize" << std::endl;
             throw std::runtime_error("Curl failed to initialize");
     }
-
+    curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, discardCallback);
+    
     if(before_act)
     {
 
@@ -87,7 +90,7 @@ void Agent::craete_enviroment(Window* window, bool before_act)
         json data = {
             {"old_map", *_env.old_pixel_map},
             {"head_pos", {_env.old_head_pos[0], _env.old_head_pos[1]}},
-            {"apple_pos", {_env.old_apple_pos[0], _env.old_apple_pos[1]}}
+            {"apple_pos", {_env.old_apple_pos[0], _env.old_apple_pos[1]}},
         };
 
 
@@ -109,15 +112,15 @@ void Agent::craete_enviroment(Window* window, bool before_act)
         {
             throw std::runtime_error("Curl failed to perform");
         }
-    }
-    else
+    } else
     {
         _env.new_pixel_map = get_features(screenshot, before_act);
 
         json data = {
-            {"old_map", *_env.new_pixel_map},
+            {"new_map", *_env.new_pixel_map},
             {"head_pos", {_env.new_head_pos[0], _env.new_head_pos[1]}},
-            {"apple_pos", {_env.new_apple_pos[0], _env.new_apple_pos[1]}}
+            {"apple_pos", {_env.new_apple_pos[0], _env.new_apple_pos[1]}},
+            {"reward", _env.reward },
         };
 
                 std::string json_data = data.dump();
@@ -127,7 +130,6 @@ void Agent::craete_enviroment(Window* window, bool before_act)
         struct curl_slist* headers = NULL;
 
         headers = curl_slist_append(headers, "Content-Type: application/json");
-
         curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/env_after_act").c_str());
         curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
 
@@ -137,8 +139,7 @@ void Agent::craete_enviroment(Window* window, bool before_act)
         {
             throw std::runtime_error("Curl failed to perform");
         }
-    }
-
+    };
     curl_easy_cleanup(_curl);
 }
 
@@ -152,11 +153,11 @@ void Agent::act(Snake* m_snake)
 
     if(exploration_threshold > _exploration_rate)
     {
-        action = rand() % 4;
+        action = get_action();
     }
     else
     {
-        action = get_action();
+        action = rand() % 4;
     }
 
         
@@ -185,8 +186,18 @@ void Agent::act(Snake* m_snake)
 
 void Agent::update_q_value()
 {       
-    json reward;
-    reward["reward"] = _env.reward;
+    _curl = curl_easy_init();
+    if (!_curl)
+    {
+        std::cerr << "Curl failed to initialize" << std::endl;
+        throw std::runtime_error("Curl failed to initialize");
+    }
+
+    curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/update_q_values").c_str());
+    curl_easy_setopt(_curl, CURLOPT_HTTPGET, 1L);
+
+    CURLcode res = curl_easy_perform(_curl);
+    curl_easy_cleanup(_curl);
 }
 
 void Agent::update_exploration_rate()
@@ -336,6 +347,8 @@ void Agent::calculate_reward(Snake* m_snake)
     {
         _env.reward += REWARD::MOVE_REWARD;
     }
+
+
 }
 
 void Agent::restart()
