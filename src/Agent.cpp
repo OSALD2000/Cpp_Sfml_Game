@@ -1,23 +1,9 @@
 #include "../includes/Agent.h"
 
-Agent::Agent(std::string python_interpreter)
+Agent::Agent(std::string python_interpreter, std::string api_url)
 {
     _python_interpreter = python_interpreter;
-    
-    _act_json_file_name             = "env_data/act.json";
-    _old_env_json_file_name         = "env_data/old_env.json";
-    _action_json_file_name          = "env_data/action.json";
-    _new_env_json_file_name         = "env_data/new_env.json";
-
-    _old_head_pos_json_file_name    = "env_data/old_head_pos.json";
-    _new_head_pos_json_file_name    = "env_data/new_head_pos.json";
-    _old_apple_pos_json_file_name   = "env_data/old_apple_pos.json";
-    _new_apple_pos_json_file_name   = "env_data/new_apple_pos.json";
-
-    _act_python_file_name = "/home/osa/Private/C_Sfml_Game/build/agent/act.py";
-    _update_q_value_python_file_name = "/home/osa/Private/C_Sfml_Game/build/agent/update_q_values.py";
-
-    _reward_json_file_name = "env_data/reward.json";
+    _api_url = api_url;
 
     _env.new_pixel_map = nullptr;
     _env.old_pixel_map = nullptr;
@@ -43,19 +29,49 @@ Agent::Agent(std::string python_interpreter)
     _exploration_decay_rate = 0.01;
 
     a_has_lost = false;
+
+    _curl = curl_easy_init();
+    if (!_curl)
+    {
+        std::cerr << "Curl failed to initialize" << std::endl;
+        throw std::runtime_error("Curl failed to initialize");
+    }
 }
+
 
 Agent::~Agent()
 {
+        if (_curl) {
+            curl_easy_cleanup(_curl);
+        }
 }
+
+
+size_t write_action_callback(void *contents, size_t size, size_t nmemb, std::string *buffer)
+ {
+    size_t total_size = size * nmemb;
+    buffer->append(static_cast<char*>(contents), total_size);
+    return total_size;
+ }
+ 
+
 
 void Agent::craete_enviroment(Window* window, bool before_act)
 {
     _env.image_texture.create(window->GetRenderWindow()->getSize().x, window->GetRenderWindow()->getSize().y);
     _env.image_texture.update(*window->GetRenderWindow());
     sf::Image screenshot = _env.image_texture.copyToImage();
+
+    _curl = curl_easy_init();
+    if (!_curl)
+    {
+            std::cerr << "Curl failed to initialize" << std::endl;
+            throw std::runtime_error("Curl failed to initialize");
+    }
+
     if(before_act)
     {
+
         if (_env.new_pixel_map != nullptr)
         {
             delete _env.old_pixel_map;
@@ -67,26 +83,63 @@ void Agent::craete_enviroment(Window* window, bool before_act)
             _env.old_pixel_map = get_features(screenshot, before_act);
             _env.new_pixel_map = nullptr;
         }
-        json env_old(*_env.old_pixel_map);
-        json old_head_pos = {_env.old_head_pos[0], _env.old_head_pos[1]};
-        json old_apple_pos = {_env.old_apple_pos[0], _env.old_apple_pos[1]};
-
-        write_in_file(_old_env_json_file_name       , env_old);
-        write_in_file(_old_head_pos_json_file_name  , old_head_pos);
-        write_in_file(_old_apple_pos_json_file_name , old_apple_pos);
         
+        json data = {
+            {"old_map", *_env.old_pixel_map},
+            {"head_pos", {_env.old_head_pos[0], _env.old_head_pos[1]}},
+            {"apple_pos", {_env.old_apple_pos[0], _env.old_apple_pos[1]}}
+        };
+
+
+        std::string json_data = data.dump();
+
+        
+        curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, json_data.c_str());
+
+        struct curl_slist* headers = NULL;
+
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+        curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/env_before_act").c_str());
+        curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
+
+        CURLcode res = curl_easy_perform(_curl);
+
+        if (res != CURLE_OK)
+        {
+            throw std::runtime_error("Curl failed to perform");
+        }
     }
     else
     {
         _env.new_pixel_map = get_features(screenshot, before_act);
-        json env_new(*_env.old_pixel_map);
-        json new_head_pos = {_env.new_head_pos[0], _env.new_head_pos[1]};
-        json new_apple_pos = {_env.new_apple_pos[0], _env.new_apple_pos[1]};
-        
-        write_in_file(_new_env_json_file_name, env_new);
-        write_in_file(_new_head_pos_json_file_name  , new_head_pos);
-        write_in_file(_new_apple_pos_json_file_name , new_apple_pos);
+
+        json data = {
+            {"old_map", *_env.new_pixel_map},
+            {"head_pos", {_env.new_head_pos[0], _env.new_head_pos[1]}},
+            {"apple_pos", {_env.new_apple_pos[0], _env.new_apple_pos[1]}}
+        };
+
+                std::string json_data = data.dump();
+ 
+        curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, json_data.c_str());
+
+        struct curl_slist* headers = NULL;
+
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+        curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/env_after_act").c_str());
+        curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
+
+        CURLcode res = curl_easy_perform(_curl);
+
+        if (res != CURLE_OK)
+        {
+            throw std::runtime_error("Curl failed to perform");
+        }
     }
+
+    curl_easy_cleanup(_curl);
 }
 
 void Agent::act(Snake* m_snake)
@@ -96,14 +149,14 @@ void Agent::act(Snake* m_snake)
     _env.old_scoure = m_snake->GetScore();
 
     double exploration_threshold  = static_cast<double>(rand())/ RAND_MAX;
+
     if(exploration_threshold > _exploration_rate)
     {
-        std::system((_python_interpreter + " " + _act_python_file_name).c_str());
-        action = get_action();
+        action = rand() % 4;
     }
     else
     {
-        action = rand() % 4;
+        action = get_action();
     }
 
         
@@ -134,10 +187,6 @@ void Agent::update_q_value()
 {       
     json reward;
     reward["reward"] = _env.reward;
-
-    write_in_file(_reward_json_file_name, reward);
-
-    std::system((_python_interpreter + " " + _update_q_value_python_file_name).c_str());
 }
 
 void Agent::update_exploration_rate()
@@ -146,14 +195,6 @@ void Agent::update_exploration_rate()
                         (_max_exploration_rate - _min_exploration_rate) * std::exp(-_exploration_decay_rate);
 }
 
-void Agent::write_in_file(std::string file_name, json& data)
-{
-    std::ofstream file(file_name);
-    if (file.is_open()) {
-        file << std::setw(1) << data << std::endl;
-        file.close();
-    } 
-}
 
 
 std::vector<std::vector<int>>* Agent::get_features(sf::Image& screenshot, bool before_act)
@@ -245,28 +286,43 @@ std::vector<std::vector<int>>* Agent::get_features(sf::Image& screenshot, bool b
 };
 
 
-json Agent::read_from_file(std::string file_name)
-{
-    std::ifstream file(file_name);
-    json data;
-    if (file.is_open()) {
-        file >> data;
-        file.close();
-    }
-    return data;
-}
 
 int Agent::get_action()
 {
-   json data = read_from_file(_action_json_file_name);
-   std::string action = data["action"];
-   int action_int = std::stoi(action);
+    _curl = curl_easy_init();
+    if (!_curl)
+    {
+        std::cerr << "Curl failed to initialize" << std::endl;
+        throw std::runtime_error("Curl failed to initialize");
+    }
 
-   return action_int;
+    std::string action_buffer;
+
+    struct curl_slist* headers = NULL;
+
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/action").c_str());
+    curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(_curl, CURLOPT_HTTPGET, 1L);
+
+    curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, write_action_callback);
+
+    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, &action_buffer);
+
+    CURLcode res = curl_easy_perform(_curl);
+
+    json response_json = json::parse(action_buffer);
+
+    std::string action = response_json["action"];
+
+    int action_int = std::stoi(action);
+
+    curl_easy_cleanup(_curl);
+    return action_int;
 }
 
 
-void Agent::calculate_reward(Snake* m_snake)
+void Agent::calculate_reward(Snake* m_snake)    
 {
     if (a_has_lost)
     {
@@ -312,3 +368,4 @@ void Agent::restart()
 
     a_has_lost = false;
 }
+

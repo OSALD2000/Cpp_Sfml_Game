@@ -8,8 +8,11 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <curl/curl.h>
+
 
 using json = nlohmann::json;
+
 struct Environment
 {
     sf::Texture image_texture;
@@ -64,7 +67,7 @@ enum STATE
 class Agent
 {
 public:
-    Agent(std::string python_interpreter);
+    Agent(std::string python_interpreter, std::string api_url);
     ~Agent();
     void craete_enviroment(Window* window, bool before_act);
     void act(Snake* m_snake);
@@ -76,24 +79,15 @@ public:
     bool a_has_lost;
     
 private:
-    void write_in_file(std::string file_name, json& data);
-    json read_from_file(std::string file_name);
     int  get_action();
 
     std::vector<std::vector<int>>* get_features(sf::Image& image, bool before_act);
     Environment     _env;
     std::string     _python_interpreter;
-    std::string     _act_json_file_name;
-    std::string     _action_json_file_name;
-    std::string     _old_env_json_file_name;
-    std::string     _new_env_json_file_name;
-    std::string     _old_head_pos_json_file_name;
-    std::string     _new_head_pos_json_file_name;
-    std::string     _old_apple_pos_json_file_name;
-    std::string     _new_apple_pos_json_file_name;
-    std::string     _act_python_file_name;
-    std::string     _update_q_value_python_file_name;
-    std::string     _reward_json_file_name;
+    std::string _api_url;
+    CURL*          _curl;
+
+
     float  _exploration_rate;
     float  _exploration_decay_rate;
     float  _min_exploration_rate;
