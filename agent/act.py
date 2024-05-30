@@ -31,7 +31,6 @@ def act():
         combined_flat = np.concatenate([map_flat, snake_head_flat, apple_flat])
         env = combined_flat.reshape(1, -1)
         
-        print(env.shape)
         
         action_index = agent.act(env)
         

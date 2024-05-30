@@ -16,39 +16,27 @@ int main(int, char**) {
     Game game;
     Agent agent(PYTHON_INTERPRETER);
 
+    game.SetAgent(&agent);
     
     sf::Clock clock;
     while (!game.GetWindow()->IsDone()) {
-        game.HandleInput();
-        game.Update();
-        game.Render();
+        //game.HandleInput();
         
+        agent.act(game.GetSnake());
         agent.craete_enviroment(game.GetWindow(), true);
-        agent.act();
-        
-        // craete fueature to update q value
-        // update q value
-        // check if game is over
-        // if game is over, update exploration_rate
-        
+        game.Update();       
+        game.Render();
+        agent.calculate_reward(game.GetSnake());
+        agent.craete_enviroment(game.GetWindow(), false);
+        agent.update_q_value();
         game.RestartClock();
+
+        if(agent.a_has_lost)
+        {
+            agent.update_exploration_rate();
+            agent.restart();
+        }
     }
 
     return 0;
 }
-
-
-
-
-
-
-    // std::vector<std::vector<int>> c_vector {
-    //     std::vector<int> {1, 2, 3, 4},
-    //     std::vector<int> {1, 2, 3, 4},
-    //     std::vector<int> {1, 2, 3, 4},
-    // };
-
-    // json j_vec(c_vector);
-
-    // std::ofstream o("env_data/test.json");
-    // o << std::setw(4) << j_vec << std::endl;

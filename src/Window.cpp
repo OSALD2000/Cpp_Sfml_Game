@@ -42,6 +42,14 @@ void Window::Destroy()
 
 void Window::Update()
 {
+    sf::Event event;
+    while (m_window.pollEvent(event))
+    {
+        if (event.type == sf::Event::Closed)
+        {
+            m_isDone = true;
+        }
+    }
 };
 
 void Window::ToggleFullscreen()

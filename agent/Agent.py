@@ -47,3 +47,5 @@ class Agent():
 
         self.model.fit(env, current_q_values, epochs=1, verbose=0)
         
+        self.model.save('agent/model/q_deep_model')
+        

@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Snake.h"
 #include "TextBox.h"
+#include "Agent.h"
 
 
 class Game{
@@ -19,6 +20,9 @@ public:
 
 	Window* GetWindow();
 
+	Snake* GetSnake();
+
+	void SetAgent(Agent* agent);
 
 	
 private:
@@ -28,6 +32,8 @@ private:
 	float m_elapsed;
 	Textbox m_textbox;
 
-	World m_world;
-	Snake m_snake;
+	World 	m_world;
+	Snake 	m_snake;
+	Agent* 	m_agent;
+
 };

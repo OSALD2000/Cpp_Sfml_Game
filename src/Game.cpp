@@ -77,9 +77,11 @@ void Game::Update()
     if (m_elapsed >= timestep) {
         m_snake.Tick();
         m_world.Update(m_snake);
+        m_window.Update();
         m_elapsed -= timestep;
         if (m_snake.HasLost()) {
             m_snake.Reset();
+            m_agent->a_has_lost = true;
         }
     }
 };
@@ -111,4 +113,15 @@ void Game::RestartClock()
 
     m_elapsed += m_clock.restart().asSeconds();
 
+};
+
+Snake* Game::GetSnake()
+{
+    return &m_snake;
+};
+
+
+void Game::SetAgent(Agent* agent)
+{
+    m_agent = agent;
 };

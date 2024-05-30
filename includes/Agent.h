@@ -1,10 +1,13 @@
 #pragma once
 #include "Window.h"
+#include "Snake.h"
 #include <string>
 #include <vector>
 #include <fstream> 
 #include <nlohmann/json.hpp>
-
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
 
 using json = nlohmann::json;
 struct Environment
@@ -21,6 +24,7 @@ struct Environment
     int old_state;
     int next_state;
     bool done;
+    int old_scoure;
 };
 
 enum Action
@@ -42,6 +46,20 @@ enum WORLD_CREATIORS
     SNAKE_HEAD_CELL = 4    
 };
 
+enum REWARD
+{
+    FOOD_REWARD = 1000,
+    DEATH_REWARD = -2000,
+    MOVE_REWARD = -1
+};
+
+enum STATE
+{
+    SNAKE_RUNING = 0,
+    SNAKE_DEAD = 1,
+    SNAKE_EATING = 2, 
+};
+
 
 class Agent
 {
@@ -49,24 +67,35 @@ public:
     Agent(std::string python_interpreter);
     ~Agent();
     void craete_enviroment(Window* window, bool before_act);
-    void act();
+    void act(Snake* m_snake);
+    void calculate_reward(Snake* m_snake);
     void update_q_value();
-    void check_game_over();
     void update_exploration_rate();
+    void restart();
+
+    bool a_has_lost;
     
 private:
     void write_in_file(std::string file_name, json& data);
+    json read_from_file(std::string file_name);
+    int  get_action();
+
     std::vector<std::vector<int>>* get_features(sf::Image& image, bool before_act);
-    Environment _env;
-    std::string _python_interpreter;
-    std::string _act_json_file_name;
-    std::string _action_json_file_name;
-    std::string _old_env_json_file_name;
-    std::string _new_env_json_file_name;
-    std::string _old_head_pos_json_file_name;
-    std::string _new_head_pos_json_file_name;
-    std::string _old_apple_pos_json_file_name;
-    std::string _new_apple_pos_json_file_name;
-    std::string _act_python_file_name;
-    std::string _update_q_value_python_file_name;
+    Environment     _env;
+    std::string     _python_interpreter;
+    std::string     _act_json_file_name;
+    std::string     _action_json_file_name;
+    std::string     _old_env_json_file_name;
+    std::string     _new_env_json_file_name;
+    std::string     _old_head_pos_json_file_name;
+    std::string     _new_head_pos_json_file_name;
+    std::string     _old_apple_pos_json_file_name;
+    std::string     _new_apple_pos_json_file_name;
+    std::string     _act_python_file_name;
+    std::string     _update_q_value_python_file_name;
+    std::string     _reward_json_file_name;
+    float  _exploration_rate;
+    float  _exploration_decay_rate;
+    float  _min_exploration_rate;
+    float  _max_exploration_rate;
 };
