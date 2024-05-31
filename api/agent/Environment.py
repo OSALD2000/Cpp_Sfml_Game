@@ -5,9 +5,8 @@ class Environment:
     def __init__(self) -> None:
         self.old_env = []
         self.new_env = []
-        self.action = -1
         self.reward = 0
-        
+        self.action = -1
         
 class OldEnvironmentJSON(BaseModel):
         head_pos: List[int]  = []
@@ -21,3 +20,4 @@ class NewEnvironmentJSON(BaseModel):
         apple_pos: List[int]  = []
         new_map: List[List[int]] = [[]]
         reward: int = 0
+        action: int = -1

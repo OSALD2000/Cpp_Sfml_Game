@@ -75,7 +75,7 @@ public:
     void update_q_value();
     void update_exploration_rate();
     void restart();
-
+    
     bool a_has_lost;
     
 private:

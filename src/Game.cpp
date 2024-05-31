@@ -11,7 +11,7 @@ Game::~Game()
 {
 };
 
-void Game::HandleInput()
+int Game::HandleInput()
 {  
     
     // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)
@@ -35,6 +35,8 @@ void Game::HandleInput()
     //     m_snake.SetDirection(Direction::Right);
     // }
 
+    int action;
+
     sf::Event event;
 
     while (m_window.m_window.pollEvent(event)) {
@@ -48,27 +50,31 @@ void Game::HandleInput()
             if (event.key.code == sf::Keyboard::Up
                 && m_snake.GetPhysicalDirection() != Direction::Down)
             {
+                action = 0;
                 m_snake.SetDirection(Direction::Up);
             }
             else if (event.key.code == sf::Keyboard::Down
                 && m_snake.GetPhysicalDirection() != Direction::Up)
             {
+                action = 1;
                 m_snake.SetDirection(Direction::Down);
             }
             else if (event.key.code == sf::Keyboard::Left
                 && m_snake.GetPhysicalDirection() != Direction::Right)
             {
+                action = 2;
                 m_snake.SetDirection(Direction::Left);
             }
             else if (event.key.code == sf::Keyboard::Right
                 && m_snake.GetPhysicalDirection() != Direction::Left)
             {
+                action = 3;
                 m_snake.SetDirection(Direction::Right);
             }
             break;
         }
     }
-};
+}
 
 void Game::Update()
 {

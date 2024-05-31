@@ -20,9 +20,9 @@ int main(int, char**) {
     game.SetAgent(&agent);
     
     sf::Clock clock;
-    while (!game.GetWindow()->IsDone()) {
+    for(int i = 0; i < 1500; i++){
         //game.HandleInput();
-
+        game.Render();
         agent.craete_enviroment(game.GetWindow(), true);
         agent.act(game.GetSnake());
         game.Update();       

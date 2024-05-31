@@ -11,7 +11,7 @@ public:
 	Game();
 	~Game();
 
-	void HandleInput();
+	int HandleInput();
 	void Update();
 	void Render();
 

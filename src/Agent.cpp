@@ -1,5 +1,18 @@
 #include "../includes/Agent.h"
 
+
+size_t write_action_callback(void *contents, size_t size, size_t nmemb, std::string *buffer)
+ {
+    size_t total_size = size * nmemb;
+    buffer->append(static_cast<char*>(contents), total_size);
+    return total_size;
+}
+ 
+size_t discardCallback(void *ptr, size_t size, size_t nmemb, void *stream) {
+    return size * nmemb;
+}
+
+
 Agent::Agent(std::string python_interpreter, std::string api_url)
 {
     _python_interpreter = python_interpreter;
@@ -23,7 +36,7 @@ Agent::Agent(std::string python_interpreter, std::string api_url)
     _env.reward = 0;
     _env.old_scoure = 0;
 
-    _exploration_rate = 1;
+    _exploration_rate = 0.2;
     _max_exploration_rate = 1;
     _min_exploration_rate = 0.01;
     _exploration_decay_rate = 0.01;
@@ -31,6 +44,7 @@ Agent::Agent(std::string python_interpreter, std::string api_url)
     a_has_lost = false;
 
     _curl = curl_easy_init();
+    curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, discardCallback);
     if (!_curl)
     {
         std::cerr << "Curl failed to initialize" << std::endl;
@@ -47,16 +61,6 @@ Agent::~Agent()
 }
 
 
-size_t write_action_callback(void *contents, size_t size, size_t nmemb, std::string *buffer)
- {
-    size_t total_size = size * nmemb;
-    buffer->append(static_cast<char*>(contents), total_size);
-    return total_size;
-}
- 
-size_t discardCallback(void *ptr, size_t size, size_t nmemb, void *stream) {
-    return size * nmemb;
-}
 
 void Agent::craete_enviroment(Window* window, bool before_act)
 {
@@ -70,8 +74,10 @@ void Agent::craete_enviroment(Window* window, bool before_act)
             std::cerr << "Curl failed to initialize" << std::endl;
             throw std::runtime_error("Curl failed to initialize");
     }
+
     curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, discardCallback);
-    
+    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, NULL);
+
     if(before_act)
     {
 
@@ -96,7 +102,7 @@ void Agent::craete_enviroment(Window* window, bool before_act)
 
         std::string json_data = data.dump();
 
-        
+        curl_easy_setopt(_curl, CURLOPT_WRITEDATA, NULL);
         curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, json_data.c_str());
 
         struct curl_slist* headers = NULL;
@@ -121,6 +127,7 @@ void Agent::craete_enviroment(Window* window, bool before_act)
             {"head_pos", {_env.new_head_pos[0], _env.new_head_pos[1]}},
             {"apple_pos", {_env.new_apple_pos[0], _env.new_apple_pos[1]}},
             {"reward", _env.reward },
+            {"action", _env.action}
         };
 
                 std::string json_data = data.dump();
@@ -146,7 +153,6 @@ void Agent::craete_enviroment(Window* window, bool before_act)
 void Agent::act(Snake* m_snake)
 {
     int action;
-    srand(time(0));
     _env.old_scoure = m_snake->GetScore();
 
     double exploration_threshold  = static_cast<double>(rand())/ RAND_MAX;
@@ -160,7 +166,8 @@ void Agent::act(Snake* m_snake)
         action = rand() % 4;
     }
 
-        
+    _env.action = action;
+
     if (action == Action::UP
         && m_snake->GetPhysicalDirection() != Direction::Down)
     {
