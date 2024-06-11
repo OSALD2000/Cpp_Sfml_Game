@@ -50,30 +50,31 @@ int Game::HandleInput()
             if (event.key.code == sf::Keyboard::Up
                 && m_snake.GetPhysicalDirection() != Direction::Down)
             {
-                action = 0;
+                m_action = 0;
                 m_snake.SetDirection(Direction::Up);
             }
             else if (event.key.code == sf::Keyboard::Down
                 && m_snake.GetPhysicalDirection() != Direction::Up)
             {
-                action = 1;
+                m_action = 1;
                 m_snake.SetDirection(Direction::Down);
             }
             else if (event.key.code == sf::Keyboard::Left
                 && m_snake.GetPhysicalDirection() != Direction::Right)
             {
-                action = 2;
+                m_action = 2;
                 m_snake.SetDirection(Direction::Left);
             }
             else if (event.key.code == sf::Keyboard::Right
                 && m_snake.GetPhysicalDirection() != Direction::Left)
             {
-                action = 3;
+                m_action = 3;
                 m_snake.SetDirection(Direction::Right);
             }
             break;
         }
     }
+    return m_action;
 }
 
 void Game::Update()
@@ -81,9 +82,13 @@ void Game::Update()
     float timestep = 1.0f / m_snake.GetSpeed();
 
     if (m_elapsed >= timestep) {
+        m_agent->craete_enviroment(GetWindow(), m_action);
+        m_agent->act(m_snake);
         m_snake.Tick();
         m_world.Update(m_snake);
         m_window.Update();
+        m_agent->calculate_reward(GetSnake());
+        m_agent->save_data();
         m_elapsed -= timestep;
         if (m_snake.HasLost()) {
             m_snake.Reset();

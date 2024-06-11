@@ -18,20 +18,20 @@ Agent::Agent(std::string python_interpreter, std::string api_url)
     _python_interpreter = python_interpreter;
     _api_url = api_url;
 
-    _env.new_pixel_map = nullptr;
-    _env.old_pixel_map = nullptr;
+    // _env.new_pixel_map = nullptr;
+    // _env.old_pixel_map = nullptr;
 
-    _env.old_apple_pos[0] = -1;
-    _env.old_apple_pos[1] = -1;
+    // _env.old_apple_pos[0] = -1;
+    // _env.old_apple_pos[1] = -1;
 
-    _env.new_apple_pos[0] = -1;
-    _env.new_apple_pos[1] = -1;
+    // _env.new_apple_pos[0] = -1;
+    // _env.new_apple_pos[1] = -1;
 
-    _env.old_head_pos[0] = -1;
-    _env.old_head_pos[1] = -1;
+    // _env.old_head_pos[0] = -1;
+    // _env.old_head_pos[1] = -1;
 
-    _env.new_head_pos[0] = -1;
-    _env.new_head_pos[1] = -1;
+    // _env.new_head_pos[0] = -1;
+    // _env.new_head_pos[1] = -1;
 
     _env.reward = 0;
     _env.old_scoure = 0;
@@ -42,112 +42,118 @@ Agent::Agent(std::string python_interpreter, std::string api_url)
     _exploration_decay_rate = 0.01;
 
     a_has_lost = false;
+    _replay_buffer = new std::vector<Environment>;
 
-    _curl = curl_easy_init();
-    curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, discardCallback);
-    if (!_curl)
-    {
-        std::cerr << "Curl failed to initialize" << std::endl;
-        throw std::runtime_error("Curl failed to initialize");
-    }
+    // _curl = curl_easy_init();
+    // curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, discardCallback);
+    // if (!_curl)
+    // {
+    //     std::cerr << "Curl failed to initialize" << std::endl;
+    //     throw std::runtime_error("Curl failed to initialize");
+    // }
 }
 
 
 Agent::~Agent()
 {
-        if (_curl) {
-            curl_easy_cleanup(_curl);
-        }
+        // if (_curl) {
+        //     curl_easy_cleanup(_curl);
+        // }
 }
 
 
 
-void Agent::craete_enviroment(Window* window, bool before_act)
+void Agent::craete_enviroment(Window* window, int action = -1)
 {
-    _env.image_texture.create(window->GetRenderWindow()->getSize().x, window->GetRenderWindow()->getSize().y);
-    _env.image_texture.update(*window->GetRenderWindow());
-    sf::Image screenshot = _env.image_texture.copyToImage();
+    _image_texture.create(window->GetRenderWindow()->getSize().x, window->GetRenderWindow()->getSize().y);
+    _image_texture.update(*window->GetRenderWindow());
+    sf::Image screenshot = _image_texture.copyToImage();
+    _env.snake_body = get_features(screenshot);
+    //_env.action = action;
 
-    _curl = curl_easy_init();
-    if (!_curl)
-    {
-            std::cerr << "Curl failed to initialize" << std::endl;
-            throw std::runtime_error("Curl failed to initialize");
-    }
+    // _curl = curl_easy_init();
+    // if (!_curl)
+    // {
+    //         std::cerr << "Curl failed to initialize" << std::endl;
+    //         throw std::runtime_error("Curl failed to initialize");
+    // }
 
-    curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, discardCallback);
-    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, NULL);
+    // curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, discardCallback);
+    // curl_easy_setopt(_curl, CURLOPT_WRITEDATA, NULL);
 
-    if(before_act)
-    {
+    // if(before_act)
+    // {
 
-        if (_env.new_pixel_map != nullptr)
-        {
-            delete _env.old_pixel_map;
-            _env.old_pixel_map = _env.new_pixel_map;
-            _env.new_pixel_map = nullptr;
-        }
-        else
-        {
-            _env.old_pixel_map = get_features(screenshot, before_act);
-            _env.new_pixel_map = nullptr;
-        }
+    //     if (_env.new_pixel_map != nullptr)
+    //     {
+    //         delete _env.old_pixel_map;
+    //         _env.old_pixel_map = _env.new_pixel_map;
+    //         _env.new_pixel_map = nullptr;
+    //     }
+    //     else
+    //     {
+    //         _env.old_pixel_map = get_features(screenshot, before_act);
+    //         _env.new_pixel_map = nullptr;
+    //     }
         
-        json data = {
-            {"old_map", *_env.old_pixel_map},
-            {"head_pos", {_env.old_head_pos[0], _env.old_head_pos[1]}},
-            {"apple_pos", {_env.old_apple_pos[0], _env.old_apple_pos[1]}},
-        };
+    //     json data = {
+    //         {"old_map", *_env.old_pixel_map},
+    //         {"head_pos", {_env.old_head_pos[0], _env.old_head_pos[1]}},
+    //         {"apple_pos", {_env.old_apple_pos[0], _env.old_apple_pos[1]}},
+    //     };
 
 
-        std::string json_data = data.dump();
+    //     std::string json_data = data.dump();
 
-        curl_easy_setopt(_curl, CURLOPT_WRITEDATA, NULL);
-        curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, json_data.c_str());
+    //     curl_easy_setopt(_curl, CURLOPT_WRITEDATA, NULL);
+    //     curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, json_data.c_str());
 
-        struct curl_slist* headers = NULL;
+    //     struct curl_slist* headers = NULL;
 
-        headers = curl_slist_append(headers, "Content-Type: application/json");
+    //     headers = curl_slist_append(headers, "Content-Type: application/json");
 
-        curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/env_before_act").c_str());
-        curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
+    //     curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/env_before_act").c_str());
+    //     curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
 
-        CURLcode res = curl_easy_perform(_curl);
+    //     CURLcode res = curl_easy_perform(_curl);
 
-        if (res != CURLE_OK)
-        {
-            throw std::runtime_error("Curl failed to perform");
-        }
-    } else
-    {
-        _env.new_pixel_map = get_features(screenshot, before_act);
+    //     if (res != CURLE_OK)
+    //     {
+    //         throw std::runtime_error("Curl failed to perform");
+    //     }
+    // } else
+    // {
+    //     _env.new_pixel_map = get_features(screenshot, before_act);
 
-        json data = {
-            {"new_map", *_env.new_pixel_map},
-            {"head_pos", {_env.new_head_pos[0], _env.new_head_pos[1]}},
-            {"apple_pos", {_env.new_apple_pos[0], _env.new_apple_pos[1]}},
-            {"reward", _env.reward },
-            {"action", _env.action}
-        };
+    //     json data = {
+    //         {"new_map", *_env.new_pixel_map},
+    //         {"head_pos", {_env.new_head_pos[0], _env.new_head_pos[1]}},
+    //         {"apple_pos", {_env.new_apple_pos[0], _env.new_apple_pos[1]}},
+    //         {"reward", _env.reward },
+    //         {"action", _env.action}
+    //     };
 
-                std::string json_data = data.dump();
+    //             std::string json_data = data.dump();
  
-        curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, json_data.c_str());
+    //     curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, json_data.c_str());
 
-        struct curl_slist* headers = NULL;
+    //     struct curl_slist* headers = NULL;
 
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/env_after_act").c_str());
-        curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
+    //     headers = curl_slist_append(headers, "Content-Type: application/json");
+    //     curl_easy_setopt(_curl, CURLOPT_URL, (_api_url+"/env_after_act").c_str());
+    //     curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
 
-        CURLcode res = curl_easy_perform(_curl);
+    //     CURLcode res = curl_easy_perform(_curl);
 
-        if (res != CURLE_OK)
-        {
-            throw std::runtime_error("Curl failed to perform");
-        }
-    };
-    curl_easy_cleanup(_curl);
+    //     if (res != CURLE_OK)
+    //     {
+    //         throw std::runtime_error("Curl failed to perform");
+    //     }
+    // };
+    // curl_easy_cleanup(_curl);
+
+
+
 }
 
 void Agent::act(Snake* m_snake)
@@ -157,14 +163,8 @@ void Agent::act(Snake* m_snake)
 
     double exploration_threshold  = static_cast<double>(rand())/ RAND_MAX;
 
-    if(exploration_threshold > _exploration_rate)
-    {
-        action = get_action();
-    }
-    else
-    {
-        action = rand() % 4;
-    }
+    action = get_action();
+
 
     _env.action = action;
 
@@ -215,7 +215,8 @@ void Agent::update_exploration_rate()
 
 
 
-std::vector<std::vector<int>>* Agent::get_features(sf::Image& screenshot, bool before_act)
+
+std::vector<Body> Agent::get_features(sf::Image& screenshot)
 {
         unsigned int width  = screenshot.getSize().x;
         unsigned int height = screenshot.getSize().y;
@@ -228,13 +229,10 @@ std::vector<std::vector<int>>* Agent::get_features(sf::Image& screenshot, bool b
         unsigned int blue_mean  = 0;
         unsigned int green_mean = 0;
 
-        std::vector<int> row;
-        std::vector<std::vector<int>>* map = new std::vector<std::vector<int>>;;
+        std::vector<Body> row;
         
         for (unsigned int y = 0; y <= height-20; y+=20)
         {
-            std::vector<int> row;
-
             for (unsigned int x = 0; x <= width-20; x+=20)
             {
                 red_sum = 0;
@@ -255,53 +253,115 @@ std::vector<std::vector<int>>* Agent::get_features(sf::Image& screenshot, bool b
 
                 if (red_mean > 100 && green_mean > 100)
                 {
-                    row.push_back(WORLD_CREATIORS::SNAKE_HEAD_CELL);
-                    if(before_act)
-                    {
-                        _env.old_head_pos[0] = x / 20;
-                        _env.old_head_pos[1] = y / 20;
-                    }
-                    else
-                    {
-                        _env.new_head_pos[0] = x / 20;
-                        _env.new_head_pos[1] = y / 20;
-                    }
+                    _env.head_pos[0] = x / 20;
+                    _env.head_pos[1] = y / 20;
                 }
                 else if (red_mean > 100)
                 {
-                    row.push_back(WORLD_CREATIORS::FOOD_CELL);
+                    _env.apple_pos[0] = x / 20;
+                    _env.apple_pos[1] = y / 20;
+                }
 
-                    if(before_act)
-                    {
-                        _env.old_apple_pos[0] = x / 20;
-                        _env.old_apple_pos[1] = y / 20;
-                    }
-                    else
-                    {
-                        _env.new_apple_pos[0] = x / 20;
-                        _env.new_apple_pos[1] = y / 20;
-                    }
-                }
-                else if (blue_mean > 100)
-                {
-                    row.push_back(WORLD_CREATIORS::WALL_CELL);
-                }
                 else if (green_mean > 100)
                 {
-                    row.push_back(WORLD_CREATIORS::SNAKE_CELL);
-                }
-                else 
-                {
-                    row.push_back(WORLD_CREATIORS::EMPTY_CELL);
+                    Body b;
+                    b.x = x / 20;
+                    b.y = y / 20;
+                    row.push_back(b);
                 }
         }
-
-        map->push_back(row);
     }
-
-    return map;
-
+    return row;
 };
+
+
+// std::vector<std::vector<int>>* Agent::get_features(sf::Image& screenshot, bool before_act)
+// {
+//         unsigned int width  = screenshot.getSize().x;
+//         unsigned int height = screenshot.getSize().y;
+
+//         unsigned int red_sum   = 0;
+//         unsigned int blue_sum  = 0;
+//         unsigned int green_sum = 0;
+
+//         unsigned int red_mean   = 0;
+//         unsigned int blue_mean  = 0;
+//         unsigned int green_mean = 0;
+
+//         std::vector<int> row;
+//         std::vector<std::vector<int>>* map = new std::vector<std::vector<int>>;
+        
+//         for (unsigned int y = 0; y <= height-20; y+=20)
+//         {
+//             std::vector<int> row;
+
+//             for (unsigned int x = 0; x <= width-20; x+=20)
+//             {
+//                 red_sum = 0;
+//                 blue_sum = 0;
+//                 green_sum = 0;
+
+//                 for (unsigned int i = 0; i < 10; i++)
+//                 {
+//                     sf::Color pixelColor = screenshot.getPixel(x+i, y+i);
+//                     red_sum += pixelColor.r;
+//                     blue_sum += pixelColor.b;
+//                     green_sum += pixelColor.g;
+//                 }
+
+//                 red_mean = red_sum / 10;
+//                 blue_mean = blue_sum / 10;
+//                 green_mean = green_sum / 10;
+
+//                 if (red_mean > 100 && green_mean > 100)
+//                 {
+//                     row.push_back(WORLD_CREATIORS::SNAKE_HEAD_CELL);
+//                     if(before_act)
+//                     {
+//                         _env.old_head_pos[0] = x / 20;
+//                         _env.old_head_pos[1] = y / 20;
+//                     }
+//                     else
+//                     {
+//                         _env.new_head_pos[0] = x / 20;
+//                         _env.new_head_pos[1] = y / 20;
+//                     }
+//                 }
+//                 else if (red_mean > 100)
+//                 {
+//                     row.push_back(WORLD_CREATIORS::FOOD_CELL);
+
+//                     if(before_act)
+//                     {
+//                         _env.old_apple_pos[0] = x / 20;
+//                         _env.old_apple_pos[1] = y / 20;
+//                     }
+//                     else
+//                     {
+//                         _env.new_apple_pos[0] = x / 20;
+//                         _env.new_apple_pos[1] = y / 20;
+//                     }
+//                 }
+//                 else if (blue_mean > 100)
+//                 {
+//                     row.push_back(WORLD_CREATIORS::WALL_CELL);
+//                 }
+//                 else if (green_mean > 100)
+//                 {
+//                     row.push_back(WORLD_CREATIORS::SNAKE_CELL);
+//                 }
+//                 else 
+//                 {
+//                     row.push_back(WORLD_CREATIORS::EMPTY_CELL);
+//                 }
+//         }
+
+//         map->push_back(row);
+//     }
+
+//     return map;
+
+// };
 
 
 
@@ -352,40 +412,69 @@ void Agent::calculate_reward(Snake* m_snake)
     }
     else
     {
-        _env.reward += REWARD::MOVE_REWARD;
+        int x_head = _env.head_pos[0];
+        int y_head = _env.head_pos[1];
+        int x_apple = _env.apple_pos[0];
+        int y_apple = _env.apple_pos[1];
+        int euclidean_distance = std::sqrt(std::pow(x_head - x_apple, 2) + std::pow(y_head - y_apple, 2));
+        _env.reward += (euclidean_distance * REWARD::MOVE_REWARD);
     }
-
-
 }
+
+// void Agent::restart()
+// {
+//     if(_env.old_pixel_map != nullptr)
+//     {
+//         delete _env.old_pixel_map;
+//         _env.old_pixel_map = nullptr;
+//     }
+//     if(_env.new_pixel_map != nullptr)
+//     {
+//         delete _env.new_pixel_map;
+//         _env.new_pixel_map = nullptr;
+//     }
+
+//     _env.old_apple_pos[0] = -1;
+//     _env.old_apple_pos[1] = -1;
+
+//     _env.new_apple_pos[0] = -1;
+//     _env.new_apple_pos[1] = -1;
+
+//     _env.old_head_pos[0] = -1;
+//     _env.old_head_pos[1] = -1;
+
+//     _env.new_head_pos[0] = -1;
+//     _env.new_head_pos[1] = -1;
+
+//     _env.reward = 0;
+//     _env.old_scoure = 0;
+
+//     a_has_lost = false;
+// }
+
 
 void Agent::restart()
 {
-    if(_env.old_pixel_map != nullptr)
-    {
-        delete _env.old_pixel_map;
-        _env.old_pixel_map = nullptr;
-    }
-    if(_env.new_pixel_map != nullptr)
-    {
-        delete _env.new_pixel_map;
-        _env.new_pixel_map = nullptr;
-    }
-
-    _env.old_apple_pos[0] = -1;
-    _env.old_apple_pos[1] = -1;
-
-    _env.new_apple_pos[0] = -1;
-    _env.new_apple_pos[1] = -1;
-
-    _env.old_head_pos[0] = -1;
-    _env.old_head_pos[1] = -1;
-
-    _env.new_head_pos[0] = -1;
-    _env.new_head_pos[1] = -1;
-
+    _env.snake_body.erase(_env.snake_body.begin(), _env.snake_body.end());
     _env.reward = 0;
     _env.old_scoure = 0;
-
     a_has_lost = false;
 }
 
+
+void Agent::save_data()
+{
+    _replay_buffer->push_back(_env);
+    _env.snake_body.erase(_env.snake_body.begin(), _env.snake_body.end());
+};
+
+
+void Agent::save_buffer()
+{
+    json buffer = json(*_replay_buffer);
+    std::ofstream o("tmp.json");
+    o << buffer.dump(1);
+
+    _replay_buffer->erase(_replay_buffer->begin(), _replay_buffer->end());
+    system((_python_interpreter + " ../src/utile.py").c_str());
+}

@@ -42,18 +42,18 @@ class Agent():
     
     
     def update_q_values(self, old_env, action):
-        # self.current_q_values[0][action] = (1 - self.learning_rate) * self.current_q_values[0][action] + self.learning_rate * self.target
+        self.current_q_values[0][action] = (1 - self.learning_rate) * self.current_q_values[0][action] + self.learning_rate * self.target
         # self.X_train.append(old_env)
         # self.y_train.append(self.current_q_values[0])  
-        
-        # self.model.fit(X, self.current_q_values, epochs=1, verbose=0)
-        # print("Q values updated")
+        X = old_env.reshape(1, -1)
+        self.model.fit(X, self.current_q_values, epochs=1, verbose=0)
+        print("Q values updated")
         pass
     
     def calculate_target(self, new_env, reward):
-        # X = new_env.reshape(1, -1)
-        # target = reward + self.discount_rate * np.max(self.model.predict(X))
-        # self.target = target
+        X = new_env.reshape(1, -1)
+        target = reward + self.discount_rate * np.max(self.model.predict(X))
+        self.target = target
         pass
     
     def calculate_current_q_values(self, old_env):

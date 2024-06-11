@@ -6,40 +6,37 @@ import threading
 from contextlib import asynccontextmanager
 import json
 
-def overwrite_json_file(filename, new_data):
-        existing_data = []
-        try:
-            with open(filename, 'r') as file:
-                existing_data = json.load(file)
-        except Exception as e:
-            existing_data = []
+
+# def overwrite_json_file(filename, new_data):
+#         existing_data = []
+#         try:
+#             with open(filename, 'r') as file:
+#                 existing_data = json.load(file)
+#         except Exception as e:
+#             existing_data = []
             
-        with open(filename, 'w') as file:
-            for data in new_data:
-                if isinstance(data, np.ndarray):
-                    existing_data.append(data.tolist())
-                else:
-                    existing_data.append(data)
+#         with open(filename, 'w') as file:
+#             for data in new_data:
+#                 if isinstance(data, np.ndarray):
+#                     existing_data.append(data.tolist())
+#                 else:
+#                     existing_data.append(data)
                     
-            json.dump(existing_data, file, indent=4)
+#             json.dump(existing_data, file, indent=4)
 
 
+agent = Agent(action_size=4,
+                feature_size=1604, new_model = False)
+
+envirmunet = Environment()
             
             
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-
-    overwrite_json_file('data/data.json', agent.X_train)
-    overwrite_json_file('data/label.json', agent.y_train)
+    agent.model.save('agent/model/q_deep_model_v2')
 
 app = FastAPI(lifespan= lifespan)
-agent = Agent(action_size=4,
-                feature_size=1604, new_model = False)
-
-envirmunet = Environment()
-
-
 
 
 @app.get("/action", status_code=200)

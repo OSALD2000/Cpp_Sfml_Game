@@ -35,5 +35,5 @@ private:
 	World 	m_world;
 	Snake 	m_snake;
 	Agent* 	m_agent;
-
+	int m_action;
 };
